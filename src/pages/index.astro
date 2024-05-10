@@ -1,0 +1,124 @@
+---
+import { Order } from "astro:db";
+import { db } from "astro:db";
+import { Icon } from "astro-icon/components";
+
+import OrderCards from "../components/OrderCards.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+export type TOrder = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  subscribeToNewsletter: boolean;
+  shirtSize: "sm" | "md" | "lg" | "xl" | "xxl";
+  shirtColor: "blue" | "red" | "green";
+};
+
+const orders = (await db.select().from(Order)) as TOrder[];
+---
+
+<BaseLayout>
+  <h1 class="text-4xl font-bold">Astronaut Shirts</h1>
+  <section class="grid gap-2" aria-label="Orders">
+    <h2 class="text-3xl font-bold">Current Orders</h2>
+
+    <div class="flex gap-2 flex-wrap">
+      {orders.map((o) => <OrderCards order={o} />)}
+    </div>
+  </section>
+
+  <section class="grid gap-2" aria-label="Order Form">
+    <h2 class="text-3xl font-bold">Order Form</h2>
+    <div class="flex gap-6 flex-wrap items-center justify-center">
+      <Icon
+        name="shirt"
+        width={300}
+        height={300}
+        class="text-blue-500"
+        id="shirt"
+      />
+      <form id="order-form">
+        <div class="grid gap-2">
+          <div class="flex gap-2 flex-wrap">
+            <div class="grid">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="firstName" required />
+            </div>
+            <div class="grid">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="lastName" required />
+            </div>
+          </div>
+          <div class="grid">
+            <label for="shirtSize">Shirt Size</label>
+            <select id="shirtSize" name="shirtSize" required>
+              <option value="sm">Small</option>
+              <option value="md">Medium</option>
+              <option value="lg">Large</option>
+              <option value="xl">XLarge</option>
+              <option value="xxl">XXLarge</option>
+            </select>
+          </div>
+          <div class="grid">
+            <label for="shirtColor">Shirt Color</label>
+            <select id="shirtColor" name="shirtColor" required>
+              <option value="blue">Blue</option>
+              <option value="red">Red</option>
+              <option value="green">Green</option>
+            </select>
+          </div>
+          <div class="flex gap-2 items-center">
+            <input
+              type="checkbox"
+              name="subscribeToNewsletter"
+              id="subscribeToNewsletter"
+            />
+            <label for="subscribeToNewsletter">Subscribe to Newsletter?</label>
+          </div>
+          <button
+            type="submit"
+            class="bg-blue-500 text-blue-50 p-2 rounded-md hover:bg-blue-400 disabled:"
+            >Submit</button
+          >
+        </div>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById("order-form") as HTMLFormElement;
+  const shirt = document.getElementById("shirt") as HTMLElement;
+  const shirtColorInput = document.getElementById(
+    "shirtColor"
+  ) as HTMLSelectElement;
+
+  // event listeners
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    // TODO: sanitize inputs
+
+    try {
+      const res = await fetch("/api/addShirt.json", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(formData)),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        console.error(error);
+      }
+
+      alert("Thanks for your order!");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please try again later.");
+    }
+  });
+
+  shirtColorInput.addEventListener("change", () => {
+    shirt.classList.remove("text-blue-400", "text-red-400", "text-green-400");
+    shirt.classList.add(`text-${shirtColorInput.value}-400`);
+  });
+</script>

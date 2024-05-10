@@ -1,0 +1,22 @@
+---
+import type { TOrder } from "../pages/index.astro";
+
+type Props = {
+  order: TOrder;
+};
+
+const { order } = Astro.props;
+---
+
+<ul class="p-4 border-2 rounded-md">
+  <li>
+    Name: {order.firstName}
+    {order.lastName}
+  </li>
+  <li>Shirt Color: {order.shirtColor}</li>
+  <li>Shirt Size: {order.shirtSize}</li>
+  <li>
+    Subscribed:{" "}
+    {order.subscribeToNewsletter === true ? "true" : "false"}
+  </li>
+</ul>
