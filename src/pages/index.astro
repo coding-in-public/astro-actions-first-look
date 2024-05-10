@@ -28,13 +28,13 @@ const orders = (await db.select().from(Order)) as TOrder[];
     </div>
   </section>
 
-  <section class="grid gap-2" aria-label="Order Form">
+  <section class="grid gap-2 place-items-center" aria-label="Order Form">
     <h2 class="text-3xl font-bold">Order Form</h2>
     <div class="flex gap-6 flex-wrap items-center justify-center">
       <Icon
         name="shirt"
-        width={300}
-        height={300}
+        width={225}
+        height={225}
         class="text-blue-500"
         id="shirt"
       />
