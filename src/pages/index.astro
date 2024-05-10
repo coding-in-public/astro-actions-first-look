@@ -88,6 +88,9 @@ const orders = (await db.select().from(Order)) as TOrder[];
 </BaseLayout>
 
 <script>
+  import { isInputError } from "astro:actions";
+  import { actions } from "astro:actions";
+
   const form = document.getElementById("order-form") as HTMLFormElement;
   const shirt = document.getElementById("shirt") as HTMLElement;
   const shirtColorInput = document.getElementById(
@@ -100,21 +103,32 @@ const orders = (await db.select().from(Order)) as TOrder[];
     const formData = new FormData(form);
     // TODO: sanitize inputs
 
-    try {
-      const res = await fetch("/api/addShirt.json", {
-        method: "POST",
-        body: JSON.stringify(Object.fromEntries(formData)),
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        console.error(error);
-      }
+    const { data, error } = await actions.order.safe(formData);
 
-      alert("Thanks for your order!");
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong. Please try again later.");
+    if (data) {
+      form.reset();
+      alert(data);
     }
+
+    if (error && isInputError(error)) {
+      console.log(error.fields);
+    }
+
+    // try {
+    //   const res = await fetch("/api/addShirt.json", {
+    //     method: "POST",
+    //     body: JSON.stringify(Object.fromEntries(formData)),
+    //   });
+    //   if (!res.ok) {
+    //     const error = await res.json();
+    //     console.error(error);
+    //   }
+
+    //   alert("Thanks for your order!");
+    // } catch (err) {
+    //   console.error(err);
+    //   alert("Something went wrong. Please try again later.");
+    // }
   });
 
   shirtColorInput.addEventListener("change", () => {
